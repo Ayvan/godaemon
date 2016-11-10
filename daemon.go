@@ -29,6 +29,7 @@ const (
 type DaemonAttr struct {
 	ProgramName   string      // child's os.Args[0]; copied from parent if empty
 	CaptureOutput bool        // whether to capture stdout/stderr
+	WorkingDir    string
 	Files         []**os.File // files to keep open in the daemon
 }
 
@@ -213,7 +214,11 @@ func MakeDaemon(attrs *DaemonAttr) (io.Reader, io.Reader, error) {
 		os.Exit(0)
 	}
 
-	os.Chdir("/")
+	if len(attrs.WorkingDir) > 0 {
+		os.Chdir(attrs.WorkingDir)
+	} else {
+		os.Chdir("/")
+	}
 	syscall.Umask(0)
 	resetEnv()
 
